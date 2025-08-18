@@ -1,1 +1,1188 @@
-Sideline-reporter/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sideline Reporter - Hybrid AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #e1e8ff;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            color: #1e3c72;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sport-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sport-btn {
+            padding: 12px;
+            border: 2px solid #e1e8ff;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .sport-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .sport-btn:hover {
+            border-color: #667eea;
+        }
+
+        .recording-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .recording-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .record-btn, .transcribe-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .record-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .transcribe-btn {
+            background: linear-gradient(135deg, #10ac84, #00d2d3);
+            color: white;
+        }
+
+        .record-btn:disabled, .transcribe-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .record-btn.recording {
+            background: linear-gradient(135deg, #ff4757, #ff3838);
+            animation: pulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .timer {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e3c72;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .transcription-area {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 2px solid #e1e8ff;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            margin-top: 10px;
+        }
+
+        .transcription-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ff;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .guided-questions {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .guided-questions h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .guided-questions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .guided-questions li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .guided-questions li:last-child {
+            border-bottom: none;
+        }
+
+        .photo-upload {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .photo-upload:hover {
+            border-color: #5a6fd8;
+            background: #f8f9ff;
+        }
+
+        #photoInput {
+            display: none;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #ff4757;
+            font-weight: bold;
+        }
+
+        .photo-item .caption-input {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 5px;
+            font-size: 11px;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10ac84, #00d2d3);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 172, 132, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 172, 132, 0.4);
+        }
+
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .article-output {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .article-output h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .article-content {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .article-content h1 {
+            font-size: 24px;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .article-content h2 {
+            font-size: 20px;
+            color: #2a5298;
+            margin: 20px 0 10px 0;
+        }
+
+        .article-content p {
+            margin-bottom: 15px;
+        }
+
+        .article-content blockquote {
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            padding: 10px 15px;
+            background: #f8f9ff;
+            font-style: italic;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .status-indicator {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .status-ready {
+            background: #d1f2eb;
+            color: #00695c;
+        }
+
+        .status-missing {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .ai-suggestions {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .ai-suggestions h4 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .ai-suggestions p {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📰 Sideline Reporter</h1>
+            <p>Smart templates + Real speech-to-text</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Sport Selection -->
+            <div class="section">
+                <h2><span>🏆</span> Choose Sport</h2>
+                <div class="sport-selector">
+                    <button class="sport-btn active" data-sport="football">🏈 Football</button>
+                    <button class="sport-btn" data-sport="basketball">🏀 Basketball</button>
+                    <button class="sport-btn" data-sport="soccer">⚽ Soccer</button>
+                    <button class="sport-btn" data-sport="baseball">⚾ Baseball</button>
+                    <button class="sport-btn" data-sport="volleyball">🏐 Volleyball</button>
+                    <button class="sport-btn" data-sport="track">🏃 Track & Field</button>
+                </div>
+            </div>
+
+            <!-- Smart Recording with Transcription -->
+            <div class="section">
+                <h2><span>🎤</span> Smart Interview Recording</h2>
+                <div class="recording-section">
+                    <div class="recording-controls">
+                        <button id="recordBtn" class="record-btn">🔴 Start Recording</button>
+                        <button id="transcribeBtn" class="transcribe-btn" disabled>📝 Transcribe</button>
+                    </div>
+                    <div id="timer" class="timer">00:00</div>
+                    <div id="audioContainer"></div>
+                    <textarea id="transcriptionArea" class="transcription-area" placeholder="Audio transcription will appear here... You can also type or edit the text directly."></textarea>
+                    <div id="transcriptionStatus" class="transcription-status"></div>
+                </div>
+                
+                <div id="guidedQuestions" class="guided-questions">
+                    <h4>💡 Suggested Interview Questions for Football:</h4>
+                    <ul id="questionsList">
+                        <li>How do you feel about your team's performance tonight?</li>
+                        <li>What was the key moment that changed the game?</li>
+                        <li>Can you walk us through that winning play?</li>
+                        <li>How did your team prepare for this opponent?</li>
+                        <li>What's next for your team this season?</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Enhanced Story Details -->
+            <div class="section">
+                <h2><span>📝</span> Smart Story Builder</h2>
+                <div class="input-group">
+                    <label for="eventTitle">Event Title</label>
+                    <input type="text" id="eventTitle" placeholder="e.g., Hawks defeat Eagles 28-21 in overtime thriller">
+                </div>
+                
+                <div class="input-group">
+                    <label for="gameScore">Score/Result</label>
+                    <input type="text" id="gameScore" placeholder="e.g., Hawks 28, Eagles 21 (OT)">
+                </div>
+                
+                <div class="input-group">
+                    <label for="keyPlayers">Key Players</label>
+                    <input type="text" id="keyPlayers" placeholder="e.g., John Smith (QB), Sarah Johnson (RB)">
+                </div>
+                
+                <div class="input-group">
+                    <label for="gameHighlights">Game Highlights</label>
+                    <textarea id="gameHighlights" placeholder="Describe the most important plays, turnovers, scoring drives..."></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="additionalNotes">Additional Context</label>
+                    <textarea id="additionalNotes" placeholder="Weather conditions, crowd size, injuries, records broken..."></textarea>
+                </div>
+
+                <div id="aiSuggestions" class="ai-suggestions" style="display: none;">
+                    <h4>🤖 Smart Suggestions</h4>
+                    <p id="suggestionText"></p>
+                </div>
+            </div>
+
+            <!-- Enhanced Photo Section -->
+            <div class="section">
+                <h2><span>📸</span> Photo Gallery with Captions</h2>
+                <div class="photo-upload" id="photoUpload">
+                    <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                    <p><strong>Add Game Photos</strong></p>
+                    <p>Tap to select or drag and drop</p>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" multiple>
+                <div id="photoGrid" class="photo-grid"></div>
+            </div>
+
+            <!-- Generate Article -->
+            <button id="generateBtn" class="generate-btn">
+                ✨ Generate Smart Article
+            </button>
+
+            <div id="statusIndicator" class="status-indicator status-missing">
+                📋 Choose sport and add content to generate article
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Creating your intelligent article...</p>
+            </div>
+
+            <div id="articleOutput" class="article-output">
+                <h3>📄 Your Generated Article</h3>
+                <div id="articleContent" class="article-content"></div>
+                <button id="copyBtn" class="copy-btn">📋 Copy Article</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class HybridSidelineReporter {
+            constructor() {
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.isRecording = false;
+                this.startTime = 0;
+                this.timerInterval = null;
+                this.audioBlob = null;
+                this.photos = [];
+                this.selectedSport = 'football';
+                this.recognition = null;
+                this.isTranscribing = false;
+                
+                this.sportQuestions = {
+                    football: [
+                        "How do you feel about your team's performance tonight?",
+                        "What was the key moment that changed the game?",
+                        "Can you walk us through that winning play?",
+                        "How did your team prepare for this opponent?",
+                        "What's next for your team this season?"
+                    ],
+                    basketball: [
+                        "How did your shooting feel tonight?",
+                        "What was your strategy against their defense?",
+                        "Tell us about that clutch shot in the fourth quarter",
+                        "How important was rebounding in tonight's win?",
+                        "What adjustments did you make at halftime?"
+                    ],
+                    soccer: [
+                        "How did it feel to score the winning goal?",
+                        "What was your game plan against this opponent?",
+                        "Tell us about the team's passing strategy",
+                        "How crucial was possession in this match?",
+                        "What does this victory mean for your season?"
+                    ],
+                    baseball: [
+                        "Walk us through that winning hit",
+                        "How did you approach that at-bat?",
+                        "What was working for you on the mound today?",
+                        "How important was defense in tonight's game?",
+                        "What's the team's momentum heading into next game?"
+                    ],
+                    volleyball: [
+                        "Tell us about that amazing rally",
+                        "How did your team communicate during the match?",
+                        "What was your serving strategy?",
+                        "How did you read the opponent's attacks?",
+                        "What adjustments led to the comeback?"
+                    ],
+                    track: [
+                        "How did you prepare for this race?",
+                        "What was going through your mind at the finish?",
+                        "Tell us about your training for this event",
+                        "How did the weather conditions affect your performance?",
+                        "What are your goals for the rest of the season?"
+                    ]
+                };
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.initializeSpeechRecognition();
+                this.updateGuidedQuestions();
+                this.updateStatus();
+            }
+
+            initializeElements() {
+                this.recordBtn = document.getElementById('recordBtn');
+                this.transcribeBtn = document.getElementById('transcribeBtn');
+                this.timer = document.getElementById('timer');
+                this.audioContainer = document.getElementById('audioContainer');
+                this.transcriptionArea = document.getElementById('transcriptionArea');
+                this.transcriptionStatus = document.getElementById('transcriptionStatus');
+                this.photoUpload = document.getElementById('photoUpload');
+                this.photoInput = document.getElementById('photoInput');
+                this.photoGrid = document.getElementById('photoGrid');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.loading = document.getElementById('loading');
+                this.articleOutput = document.getElementById('articleOutput');
+                this.articleContent = document.getElementById('articleContent');
+                this.copyBtn = document.getElementById('copyBtn');
+                this.eventTitle = document.getElementById('eventTitle');
+                this.gameScore = document.getElementById('gameScore');
+                this.keyPlayers = document.getElementById('keyPlayers');
+                this.gameHighlights = document.getElementById('gameHighlights');
+                this.additionalNotes = document.getElementById('additionalNotes');
+                this.statusIndicator = document.getElementById('statusIndicator');
+                this.aiSuggestions = document.getElementById('aiSuggestions');
+                this.suggestionText = document.getElementById('suggestionText');
+                this.questionsList = document.getElementById('questionsList');
+            }
+
+            bindEvents() {
+                // Sport selection
+                document.querySelectorAll('.sport-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.selectSport(e.target.dataset.sport));
+                });
+
+                // Recording controls
+                this.recordBtn.addEventListener('click', () => this.toggleRecording());
+                this.transcribeBtn.addEventListener('click', () => this.startTranscription());
+
+                // Photo handling
+                this.photoUpload.addEventListener('click', () => this.photoInput.click());
+                this.photoInput.addEventListener('change', (e) => this.handlePhotoSelect(e));
+
+                // Article generation
+                this.generateBtn.addEventListener('click', () => this.generateSmartArticle());
+                this.copyBtn.addEventListener('click', () => this.copyArticle());
+
+                // Smart suggestions
+                this.eventTitle.addEventListener('input', () => this.provideSuggestions());
+                this.keyPlayers.addEventListener('input', () => this.updateStatus());
+                this.gameScore.addEventListener('input', () => this.updateStatus());
+                this.gameHighlights.addEventListener('input', () => this.updateStatus());
+                this.additionalNotes.addEventListener('input', () => this.updateStatus());
+                this.transcriptionArea.addEventListener('input', () => this.updateStatus());
+
+                // Drag and drop
+                this.photoUpload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.photoUpload.style.background = '#f0f3ff';
+                });
+                
+                this.photoUpload.addEventListener('dragleave', () => {
+                    this.photoUpload.style.background = 'white';
+                });
+                
+                this.photoUpload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.photoUpload.style.background = 'white';
+                    this.handlePhotoSelect({ target: { files: e.dataTransfer.files } });
+                });
+            }
+
+            initializeSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'en-US';
+
+                    this.recognition.onresult = (event) => {
+                        let finalTranscript = '';
+                        let interimTranscript = '';
+
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const transcript = event.results[i][0].transcript;
+                            if (event.results[i].isFinal) {
+                                finalTranscript += transcript + ' ';
+                            } else {
+                                interimTranscript += transcript;
+                            }
+                        }
+
+                        const currentText = this.transcriptionArea.value;
+                        if (finalTranscript) {
+                            this.transcriptionArea.value = currentText + finalTranscript;
+                            this.updateStatus();
+                        }
+                        
+                        this.transcriptionStatus.textContent = interimTranscript ? 
+                            `Listening: "${interimTranscript}"` : 
+                            'Listening for speech...';
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        this.transcriptionStatus.textContent = `Error: ${event.error}`;
+                        this.stopTranscription();
+                    };
+
+                    this.recognition.onend = () => {
+                        this.stopTranscription();
+                    };
+                } else {
+                    this.transcriptionStatus.textContent = 'Speech recognition not supported in this browser';
+                }
+            }
+
+            selectSport(sport) {
+                document.querySelectorAll('.sport-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-sport="${sport}"]`).classList.add('active');
+                this.selectedSport = sport;
+                this.updateGuidedQuestions();
+                this.updateStatus();
+            }
+
+            updateGuidedQuestions() {
+                const questions = this.sportQuestions[this.selectedSport] || this.sportQuestions.football;
+                const sportName = this.selectedSport.charAt(0).toUpperCase() + this.selectedSport.slice(1);
+                
+                document.querySelector('#guidedQuestions h4').textContent = `💡 Suggested Interview Questions for ${sportName}:`;
+                
+                this.questionsList.innerHTML = '';
+                questions.forEach(question => {
+                    const li = document.createElement('li');
+                    li.textContent = question;
+                    this.questionsList.appendChild(li);
+                });
+            }
+
+            async toggleRecording() {
+                if (!this.isRecording) {
+                    await this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+
+            async startRecording() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        this.audioChunks.push(event.data);
+                    };
+                    
+                    this.mediaRecorder.onstop = () => {
+                        this.audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        this.createAudioPlayer();
+                        this.transcribeBtn.disabled = false;
+                        this.updateStatus();
+                    };
+                    
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    this.startTime = Date.now();
+                    this.startTimer();
+                    
+                    this.recordBtn.classList.add('recording');
+                    this.recordBtn.textContent = '⏹️ Stop Recording';
+                    
+                } catch (error) {
+                    alert('Error accessing microphone. Please ensure you have granted microphone permissions.');
+                }
+            }
+
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    this.isRecording = false;
+                    this.stopTimer();
+                    
+                    this.recordBtn.classList.remove('recording');
+                    this.recordBtn.textContent = '🎤 Record Again';
+                }
+            }
+
+            startTimer() {
+                this.timerInterval = setInterval(() => {
+                    const elapsed = Date.now() - this.startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    this.timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            stopTimer() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                }
+            }
+
+            createAudioPlayer() {
+                this.audioContainer.innerHTML = '';
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.className = 'audio-player';
+                audio.src = URL.createObjectURL(this.audioBlob);
+                this.audioContainer.appendChild(audio);
+            }
+
+            startTranscription() {
+                if (!this.recognition) {
+                    alert('Speech recognition not supported in this browser');
+                    return;
+                }
+
+                if (this.isTranscribing) {
+                    this.stopTranscription();
+                    return;
+                }
+
+                this.isTranscribing = true;
+                this.transcribeBtn.textContent = '⏹️ Stop Transcribing';
+                this.transcriptionStatus.textContent = 'Starting transcription...';
+                
+                try {
+                    this.recognition.start();
+                } catch (error) {
+                    this.transcriptionStatus.textContent = 'Error starting transcription';
+                    this.stopTranscription();
+                }
+            }
+
+            stopTranscription() {
+                if (this.recognition && this.isTranscribing) {
+                    this.recognition.stop();
+                }
+                this.isTranscribing = false;
+                this.transcribeBtn.textContent = '📝 Start Transcribing';
+                this.transcriptionStatus.textContent = 'Transcription stopped';
+            }
+
+            handlePhotoSelect(event) {
+                const files = Array.from(event.target.files);
+                files.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.photos.push({
+                                file: file,
+                                dataUrl: e.target.result,
+                                name: file.name,
+                                caption: ''
+                            });
+                            this.updatePhotoGrid();
+                            this.updateStatus();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            updatePhotoGrid() {
+                this.photoGrid.innerHTML = '';
+                this.photos.forEach((photo, index) => {
+                    const photoItem = document.createElement('div');
+                    photoItem.className = 'photo-item';
+                    photoItem.innerHTML = `
+                        <img src="${photo.dataUrl}" alt="${photo.name}">
+                        <button class="remove-btn" onclick="app.removePhoto(${index})">×</button>
+                        <input type="text" class="caption-input" placeholder="Add caption..." 
+                               value="${photo.caption}" 
+                               onchange="app.updatePhotoCaption(${index}, this.value)">
+                    `;
+                    this.photoGrid.appendChild(photoItem);
+                });
+            }
+
+            removePhoto(index) {
+                this.photos.splice(index, 1);
+                this.updatePhotoGrid();
+                this.updateStatus();
+            }
+
+            updatePhotoCaption(index, caption) {
+                this.photos[index].caption = caption;
+            }
+
+            provideSuggestions() {
+                const title = this.eventTitle.value.toLowerCase();
+                const sport = this.selectedSport;
+                
+                let suggestion = '';
+                
+                if (title.includes('win') || title.includes('defeat') || title.includes('beat')) {
+                    suggestion = `💡 Great! Consider adding: final score, winning play details, and key player quotes.`;
+                } else if (title.includes('championship') || title.includes('playoff')) {
+                    suggestion = `🏆 Big game! Include: stakes of the game, historical context, and emotional reactions.`;
+                } else if (title.includes('overtime') || title.includes('ot')) {
+                    suggestion = `⏰ Overtime thriller! Focus on: tension moments, clutch plays, and player endurance.`;
+                } else if (sport === 'football' && (title.includes('touchdown') || title.includes('td'))) {
+                    suggestion = `🏈 Key scoring play! Describe: the drive setup, blocking, and celebration details.`;
+                } else if (sport === 'basketball' && title.includes('buzzer')) {
+                    suggestion = `🏀 Buzzer beater! Capture: the shot setup, crowd reaction, and game-winning moment.`;
+                } else if (title.length > 5) {
+                    suggestion = `📝 Good start! Add specific details like score, standout performances, and game atmosphere.`;
+                }
+                
+                if (suggestion) {
+                    this.aiSuggestions.style.display = 'block';
+                    this.suggestionText.textContent = suggestion;
+                } else {
+                    this.aiSuggestions.style.display = 'none';
+                }
+            }
+
+            updateStatus() {
+                const hasAudio = !!this.audioBlob;
+                const hasTranscription = this.transcriptionArea.value.trim().length > 10;
+                const hasPhotos = this.photos.length > 0;
+                const hasTitle = this.eventTitle.value.trim().length > 0;
+                const hasScore = this.gameScore.value.trim().length > 0;
+                const hasPlayers = this.keyPlayers.value.trim().length > 0;
+                const hasHighlights = this.gameHighlights.value.trim().length > 0;
+                
+                const contentCount = [hasAudio, hasTranscription, hasPhotos, hasTitle, hasScore, hasPlayers, hasHighlights].filter(Boolean).length;
+                
+                if (contentCount === 0) {
+                    this.statusIndicator.className = 'status-indicator status-missing';
+                    this.statusIndicator.textContent = '📋 Choose sport and add content to generate article';
+                } else if (contentCount < 3) {
+                    this.statusIndicator.className = 'status-indicator status-missing';
+                    this.statusIndicator.textContent = `📝 Add more content (${contentCount}/7 sections completed)`;
+                } else {
+                    this.statusIndicator.className = 'status-indicator status-ready';
+                    this.statusIndicator.textContent = `✅ Ready to generate! (${contentCount}/7 sections completed)`;
+                }
+            }
+
+            generateSmartArticle() {
+                const hasContent = this.transcriptionArea.value.trim() || this.eventTitle.value.trim() || 
+                                 this.gameScore.value.trim() || this.photos.length > 0;
+                
+                if (!hasContent) {
+                    alert('Please add some content first - record an interview, add game details, or upload photos.');
+                    return;
+                }
+
+                this.loading.style.display = 'block';
+                this.articleOutput.style.display = 'none';
+                this.generateBtn.disabled = true;
+
+                // Simulate processing time for a more realistic feel
+                setTimeout(() => {
+                    this.createIntelligentArticle();
+                    this.loading.style.display = 'none';
+                    this.articleOutput.style.display = 'block';
+                    this.generateBtn.disabled = false;
+                }, 2500);
+            }
+
+            createIntelligentArticle() {
+                const title = this.eventTitle.value.trim() || `${this.selectedSport.charAt(0).toUpperCase() + this.selectedSport.slice(1)} Game Coverage`;
+                const score = this.gameScore.value.trim();
+                const players = this.keyPlayers.value.trim();
+                const highlights = this.gameHighlights.value.trim();
+                const notes = this.additionalNotes.value.trim();
+                const transcription = this.transcriptionArea.value.trim();
+                const sport = this.selectedSport;
+                
+                let article = `<h1>${title}</h1>\n\n`;
+                
+                // Smart lead paragraph based on available data
+                if (score) {
+                    const sportTerms = this.getSportTerminology(sport);
+                    article += `<p><strong>${score.split(',')[0] || 'The home team'}</strong> ${sportTerms.victory} in ${sportTerms.gameType} that showcased incredible ${sportTerms.skills} and determination from both sides.</p>\n\n`;
+                } else {
+                    article += `<p>In an exciting ${sport} matchup, both teams demonstrated the skill and intensity that makes high school sports so compelling to watch.</p>\n\n`;
+                }
+                
+                // Game highlights section
+                if (highlights) {
+                    article += `<h2>Game Highlights</h2>\n`;
+                    article += `<p>${highlights}</p>\n\n`;
+                } else {
+                    const sportTerms = this.getSportTerminology(sport);
+                    article += `<h2>Key Moments</h2>\n`;
+                    article += `<p>The game featured several momentum-shifting plays that kept spectators on the edge of their seats. Both teams showed excellent ${sportTerms.skills} throughout the contest.</p>\n\n`;
+                }
+                
+                // Player spotlight
+                if (players) {
+                    article += `<h2>Player Spotlight</h2>\n`;
+                    const playerList = players.split(',').map(p => p.trim());
+                    if (playerList.length > 1) {
+                        article += `<p>Outstanding performances came from ${playerList.slice(0, -1).join(', ')} and ${playerList[playerList.length - 1]}, who each played crucial roles in tonight's outcome.</p>\n\n`;
+                    } else {
+                        article += `<p>${playerList[0]} delivered an outstanding performance that was instrumental in the team's success tonight.</p>\n\n`;
+                    }
+                }
+                
+                // Interview quotes (if transcription available)
+                if (transcription) {
+                    article += `<h2>Post-Game Interviews</h2>\n`;
+                    const sentences = transcription.split('.').filter(s => s.trim().length > 10);
+                    if (sentences.length > 0) {
+                        // Extract meaningful quotes
+                        const quotes = sentences.slice(0, 3).map(s => s.trim() + '.');
+                        quotes.forEach(quote => {
+                            if (quote.length > 20) {
+                                article += `<blockquote>"${quote}"</blockquote>\n`;
+                            }
+                        });
+                        article += `<p>The interview revealed insights into the team's strategy and the emotions surrounding tonight's performance.</p>\n\n`;
+                    }
+                }
+                
+                // Photo section
+                if (this.photos.length > 0) {
+                    article += `<h2>Photo Gallery</h2>\n`;
+                    article += `<p>Our photographers captured the intensity and emotion of tonight's game:</p>\n\n`;
+                    
+                    this.photos.forEach((photo, index) => {
+                        const caption = photo.caption || `Action shot from tonight's ${sport} game`;
+                        article += `<div style="margin: 15px 0; text-align: center;">`;
+                        article += `<img src="${photo.dataUrl}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" alt="${caption}">`;
+                        article += `<p style="font-style: italic; color: #666; margin-top: 8px; font-size: 14px;">${caption}</p>`;
+                        article += `</div>\n`;
+                    });
+                }
+                
+                // Additional context
+                if (notes) {
+                    article += `<h2>Game Context</h2>\n`;
+                    article += `<p>${notes}</p>\n\n`;
+                }
+                
+                // Smart conclusion based on sport
+                const conclusions = this.getSportConclusions(sport);
+                article += `<h2>Looking Ahead</h2>\n`;
+                article += `<p>${conclusions[Math.floor(Math.random() * conclusions.length)]}</p>\n\n`;
+                
+                // Attribution
+                article += `<p style="font-style: italic; color: #888; font-size: 12px;">This article was generated using intelligent templates and real interview transcription technology.</p>`;
+
+                this.articleContent.innerHTML = article;
+            }
+
+            getSportTerminology(sport) {
+                const terms = {
+                    football: {
+                        victory: 'secured the victory',
+                        gameType: 'a hard-fought battle',
+                        skills: 'athleticism and strategic execution'
+                    },
+                    basketball: {
+                        victory: 'claimed the win',
+                        gameType: 'a fast-paced contest',
+                        skills: 'shooting accuracy and defensive intensity'
+                    },
+                    soccer: {
+                        victory: 'earned the victory',
+                        gameType: 'a competitive match',
+                        skills: 'ball control and tactical awareness'
+                    },
+                    baseball: {
+                        victory: 'took the win',
+                        gameType: 'a strategic game',
+                        skills: 'pitching precision and batting power'
+                    },
+                    volleyball: {
+                        victory: 'captured the victory',
+                        gameType: 'an intense match',
+                        skills: 'teamwork and court awareness'
+                    },
+                    track: {
+                        victory: 'achieved victory',
+                        gameType: 'a competitive meet',
+                        skills: 'speed and endurance'
+                    }
+                };
+                return terms[sport] || terms.football;
+            }
+
+            getSportConclusions(sport) {
+                const conclusions = {
+                    football: [
+                        "Both teams will use tonight's experience to prepare for their upcoming conference matchups.",
+                        "The coaching staff will review game film to build on tonight's successes for the remainder of the season.",
+                        "With performances like these, fans can expect exciting football throughout the rest of the campaign."
+                    ],
+                    basketball: [
+                        "The team's chemistry and execution tonight bodes well for their conference tournament hopes.",
+                        "Both squads showed the depth and talent that will serve them well in upcoming league play.",
+                        "Tonight's game demonstrated the competitive balance that makes this conference so exciting."
+                    ],
+                    soccer: [
+                        "The tactical lessons learned tonight will be valuable preparation for the upcoming playoff push.",
+                        "Both teams displayed the skill and determination that defines competitive high school soccer.",
+                        "With matches like these, the remainder of the season promises continued excitement for fans."
+                    ],
+                    baseball: [
+                        "The pitching and hitting displays tonight showcase the talent level in this competitive league.",
+                        "Both teams will build on tonight's performance as they continue their push toward the postseason.",
+                        "Games like these remind us why high school baseball remains such a beloved community tradition."
+                    ],
+                    volleyball: [
+                        "The teamwork and communication on display tonight will serve both teams well moving forward.",
+                        "Tonight's match demonstrated the high level of volleyball being played in this conference.",
+                        "Both squads showed the resilience and skill that will be crucial in upcoming tournament play."
+                    ],
+                    track: [
+                        "Tonight's performances set high standards for upcoming invitational meets.",
+                        "The dedication and training evident tonight will serve these athletes well at regionals.",
+                        "Performances like these showcase the growing strength of the track and field program."
+                    ]
+                };
+                return conclusions[sport] || conclusions.football;
+            }
+
+            copyArticle() {
+                const text = this.articleContent.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    this.copyBtn.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        this.copyBtn.textContent = '📋 Copy Article';
+                    }, 2000);
+                }).catch(() => {
+                    // Fallback for browsers that don't support clipboard API
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    this.copyBtn.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        this.copyBtn.textContent = '📋 Copy Article';
+                    }, 2000);
+                });
+            }
+        }
+
+        // Initialize the hybrid app
+        const app = new HybridSidelineReporter();
+    </script>
+</body>
+</html>
