@@ -1342,25 +1342,25 @@
             }
 
             createNarrativeFromInterview(keyPoints, storyType) {
-                // Convert interview points into flowing narrative
+                // Convert interview points into flowing narrative with hip, simple language
                 let narrative = '';
                 
                 switch(storyType) {
                     case 'victory':
                     case 'sports':
-                        narrative = `The excitement was evident as details of the victory emerged. ${keyPoints[0]}. The significance of this achievement extends beyond the immediate celebration, reflecting months of preparation and dedication.`;
+                        narrative = `You could see the excitement everywhere! ${keyPoints[0]}. This win was totally worth all the hard work they put in. The team's been grinding for months, and it finally paid off big time.`;
                         break;
                     case 'achievement':
-                        narrative = `This recognition represents years of hard work and commitment. ${keyPoints[0]}. The achievement stands as an inspiration to others pursuing similar goals.`;
+                        narrative = `Talk about crushing it! ${keyPoints[0]}. This achievement is seriously impressive and shows what happens when you don't give up on your dreams.`;
                         break;
                     case 'education':
-                        narrative = `The educational milestone marks an important transition. ${keyPoints[0]}. This accomplishment opens new doors and opportunities for the future.`;
+                        narrative = `This is such a big moment! ${keyPoints[0]}. Getting to this point wasn't easy, but now the future is looking super bright.`;
                         break;
                     case 'community':
-                        narrative = `Community involvement has made a tangible difference. ${keyPoints[0]}. The impact of these efforts extends far beyond what was initially expected.`;
+                        narrative = `This is what helping others looks like! ${keyPoints[0]}. When people work together, amazing things happen in our community.`;
                         break;
                     default:
-                        narrative = `Our interview revealed important insights about this developing story. ${keyPoints[0]}. The implications of these events continue to unfold.`;
+                        narrative = `Here's what we found out in our chat. ${keyPoints[0]}. This story keeps getting more interesting as we learn more.`;
                 }
                 
                 return narrative;
@@ -1371,24 +1371,24 @@
                 const storyType = analysisResult.storyType;
                 
                 if (details) {
-                    lead = `<p><strong>In an exclusive interview,</strong> we learned about ${details.toLowerCase()}. The conversation revealed insights that bring this story to life.</p>\n\n`;
+                    lead = `<p><strong>We got the inside scoop</strong> about ${details.toLowerCase()}. The conversation was eye-opening and gave us the real story behind what happened.</p>\n\n`;
                 } else {
                     switch(storyType) {
                         case 'victory':
                         case 'sports':
-                            lead = `<p><strong>Speaking with those involved,</strong> the emotion and significance of this victory became clear. The interview provided firsthand insights into what this achievement truly means.</p>\n\n`;
+                            lead = `<p><strong>We sat down with the team</strong> right after their epic win. You could feel their excitement, and hearing their story was absolutely amazing.</p>\n\n`;
                             break;
                         case 'achievement':
-                            lead = `<p><strong>Through our conversation,</strong> the hard work and dedication behind this achievement came to light. The interview revealed the personal journey that led to this moment.</p>\n\n`;
+                            lead = `<p><strong>We caught up with someone special</strong> who just achieved something incredible. Their story will definitely inspire you.</p>\n\n`;
                             break;
                         case 'education':
-                            lead = `<p><strong>Our interview highlighted</strong> the importance of this educational milestone. The conversation provided valuable perspective on the journey and what lies ahead.</p>\n\n`;
+                            lead = `<p><strong>We talked with a graduate</strong> about their journey to this big moment. Their path wasn't always easy, but they made it happen.</p>\n\n`;
                             break;
                         case 'community':
-                            lead = `<p><strong>Talking with community members</strong> revealed the true impact of these efforts. The interview showed how individual actions can create meaningful change.</p>\n\n`;
+                            lead = `<p><strong>We met some awesome people</strong> who are making a real difference in our community. Their story shows how one person can change everything.</p>\n\n`;
                             break;
                         default:
-                            lead = `<p><strong>Our conversation provided valuable insights</strong> into this developing story. The interview revealed details that help us understand what really happened.</p>\n\n`;
+                            lead = `<p><strong>We had an interesting chat</strong> that revealed some cool details about this story. Here's what we discovered.</p>\n\n`;
                     }
                 }
                 
@@ -1418,30 +1418,30 @@
                 let lead = '';
                 
                 switch(storyType) {
-                    case 'game':
+                    case 'sports':
                         if (details) {
-                            lead = `<p><strong>Local teams competed</strong> in what proved to be an engaging athletic contest. ${details}</p>\n\n`;
+                            lead = `<p><strong>The game was lit!</strong> ${details} This match had everyone on the edge of their seats from start to finish.</p>\n\n`;
                         } else {
-                            lead = `<p>Local athletes showcased their skills in today's competitive matchup, demonstrating the dedication and talent that defines school sports.</p>\n\n`;
+                            lead = `<p>Today's game was absolutely wild! Both teams brought their A-game and gave fans something to remember forever.</p>\n\n`;
                         }
                         break;
                     case 'achievement':
-                        lead = `<p><strong>Recognition and achievement</strong> took center stage as local individuals were honored for their outstanding accomplishments.</p>\n\n`;
+                        lead = `<p><strong>Someone just did something amazing!</strong> This achievement is the kind of success story that makes you want to chase your own dreams.</p>\n\n`;
                         break;
                     case 'opening':
-                        lead = `<p><strong>A new chapter begins</strong> as the community welcomes an exciting addition that promises to benefit many.</p>\n\n`;
+                        lead = `<p><strong>Something new and exciting is here!</strong> Our community just got a cool addition that's going to make life better for everyone.</p>\n\n`;
                         break;
                     case 'education':
-                        lead = `<p><strong>Educational excellence</strong> continues to shine as students and educators achieve remarkable milestones.</p>\n\n`;
+                        lead = `<p><strong>Education wins are the best wins!</strong> This achievement shows what happens when hard work meets big dreams.</p>\n\n`;
                         break;
                     case 'community':
-                        lead = `<p><strong>Community spirit</strong> was on full display as local residents came together for a meaningful cause.</p>\n\n`;
+                        lead = `<p><strong>Our community is pretty awesome!</strong> Local people came together to do something really special, and the results speak for themselves.</p>\n\n`;
                         break;
                     default:
                         if (details) {
-                            lead = `<p><strong>Local news</strong> highlights an important story affecting our community. ${details}</p>\n\n`;
+                            lead = `<p><strong>Here's a story worth knowing about.</strong> ${details} Let's dive into what makes this so interesting.</p>\n\n`;
                         } else {
-                            lead = `<p>A significant development in our community deserves attention and recognition.</p>\n\n`;
+                            lead = `<p>Something cool is happening in our community, and we're here to tell you all about it.</p>\n\n`;
                         }
                 }
                 
@@ -1450,7 +1450,7 @@
 
             createMainSection(storyType, highlights) {
                 let section = '';
-                const sectionTitle = storyType === 'game' ? 'Key Moments' : 'Highlights';
+                const sectionTitle = storyType === 'sports' ? 'The Best Moments' : 'What Happened';
                 
                 section += `<h2>${sectionTitle}</h2>\n`;
                 section += `<p>${highlights}</p>\n\n`;
@@ -1462,12 +1462,12 @@
                 let section = '';
                 const peopleList = people.split(',').map(p => p.trim());
                 
-                section += `<h2>Key Individuals</h2>\n`;
+                section += `<h2>The People Behind the Story</h2>\n`;
                 
                 if (peopleList.length > 1) {
-                    section += `<p>This story involves several important individuals: ${peopleList.slice(0, -1).join(', ')} and ${peopleList[peopleList.length - 1]}. Each played a crucial role in today's events.</p>\n\n`;
+                    section += `<p>This story couldn't happen without some pretty cool people: ${peopleList.slice(0, -1).join(', ')} and ${peopleList[peopleList.length - 1]}. Each one brought something special to make this happen.</p>\n\n`;
                 } else {
-                    section += `<p>${peopleList[0]} was instrumental in today's story, demonstrating leadership and commitment.</p>\n\n`;
+                    section += `<p>${peopleList[0]} was the star of this story. Their hard work and dedication made all the difference.</p>\n\n`;
                 }
                 
                 return section;
@@ -1476,7 +1476,7 @@
             createQuoteSection(transcription, storyType) {
                 let section = '';
                 
-                section += `<h2>Interviews</h2>\n`;
+                section += `<h2>What They Told Us</h2>\n`;
                 
                 // Extract meaningful sentences from transcription
                 const sentences = transcription.split(/[.!?]+/).filter(s => s.trim().length > 15);
@@ -1489,9 +1489,9 @@
                             section += `<blockquote>"${quote}."</blockquote>\n`;
                         }
                     });
-                    section += `<p>These firsthand accounts provide valuable insight into the significance and impact of today's events.</p>\n\n`;
+                    section += `<p>These quotes give you the real story from the people who lived it. Pretty cool stuff!</p>\n\n`;
                 } else {
-                    section += `<p>Interviews conducted provide valuable perspectives on the importance and impact of these events.</p>\n\n`;
+                    section += `<p>We had some great conversations that helped us understand what really went down.</p>\n\n`;
                 }
                 
                 return section;
@@ -1500,11 +1500,11 @@
             createPhotoSection(storyType) {
                 let section = '';
                 
-                section += `<h2>Photo Coverage</h2>\n`;
-                section += `<p>Our photography captures the essence and importance of this story:</p>\n\n`;
+                section += `<h2>Check Out These Photos</h2>\n`;
+                section += `<p>Our photographers captured some amazing shots that tell the story better than words:</p>\n\n`;
                 
                 this.photos.forEach((photo, index) => {
-                    const caption = photo.caption || `Image ${index + 1} from today's coverage`;
+                    const caption = photo.caption || `Cool photo ${index + 1} from this story`;
                     section += `<div style="margin: 15px 0; text-align: center;">`;
                     section += `<img src="${photo.dataUrl}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" alt="${caption}">`;
                     section += `<p style="font-style: italic; color: #666; margin-top: 8px; font-size: 14px;">${caption}</p>`;
@@ -1517,26 +1517,26 @@
             createConclusion(storyType, isGameStory, sport) {
                 let conclusion = '';
                 
-                conclusion += `<h2>Looking Forward</h2>\n`;
+                conclusion += `<h2>What's Next?</h2>\n`;
                 
                 switch(storyType) {
-                    case 'game':
-                        conclusion += `<p>Both teams demonstrated skill and sportsmanship that reflects positively on their programs and the community's support for athletics.</p>\n\n`;
+                    case 'sports':
+                        conclusion += `<p>Both teams showed they've got serious skills and heart. This kind of sportsmanship makes our community proud and gets everyone excited for what's coming next.</p>\n\n`;
                         break;
                     case 'achievement':
-                        conclusion += `<p>These achievements reflect the dedication and hard work that make our community proud and inspire others to pursue excellence.</p>\n\n`;
+                        conclusion += `<p>This achievement is just the beginning! Success like this inspires other people to chase their dreams and shows what's possible when you don't give up.</p>\n\n`;
                         break;
                     case 'opening':
-                        conclusion += `<p>This new addition to our community represents progress and opportunity, promising positive impact for years to come.</p>\n\n`;
+                        conclusion += `<p>This new addition is going to make our community even more awesome. We can't wait to see how it brings people together and creates new opportunities.</p>\n\n`;
                         break;
                     case 'education':
-                        conclusion += `<p>Educational achievements like these highlight the commitment to learning and growth that defines our community's values.</p>\n\n`;
+                        conclusion += `<p>Educational success like this shows how bright our future is. When students achieve great things, it lifts up everyone around them.</p>\n\n`;
                         break;
                     case 'community':
-                        conclusion += `<p>Community involvement and cooperation like this demonstrate the spirit that makes our area a special place to live and work.</p>\n\n`;
+                        conclusion += `<p>Community spirit like this is what makes our area such a special place. When people work together, incredible things happen.</p>\n\n`;
                         break;
                     default:
-                        conclusion += `<p>This story represents the kind of community engagement and achievement that makes our area a vibrant and thriving place.</p>\n\n`;
+                        conclusion += `<p>Stories like this remind us that interesting things are always happening in our community. Stay tuned for more cool updates!</p>\n\n`;
                 }
                 
                 return conclusion;
@@ -1586,39 +1586,39 @@
             getSportConclusions(sport) {
                 const conclusions = {
                     general: [
-                        "This story represents the kind of community engagement that makes our area special.",
-                        "Events like these highlight the positive impact individuals can have on their community.",
-                        "The dedication shown here serves as an inspiration for others in our community."
+                        "This story shows how awesome our community really is.",
+                        "Cool things like this happen when people work together and chase their dreams.",
+                        "Stories like this inspire everyone to do amazing things too."
                     ],
                     football: [
-                        "Both teams will use tonight's experience to prepare for their upcoming conference matchups.",
-                        "The coaching staff will review game film to build on tonight's successes for the remainder of the season.",
-                        "With performances like these, fans can expect exciting football throughout the rest of the campaign."
+                        "Both teams are going to use this experience to get even better for their next games.",
+                        "The coaches have some great game film to study, and fans can expect more exciting football ahead.",
+                        "Games like this remind us why high school football is so much fun to watch."
                     ],
                     basketball: [
-                        "The team's chemistry and execution tonight bodes well for their conference tournament hopes.",
-                        "Both squads showed the depth and talent that will serve them well in upcoming league play.",
-                        "Tonight's game demonstrated the competitive balance that makes this conference so exciting."
+                        "This team chemistry is going to help them big time in the tournament.",
+                        "Both teams showed they've got the skills and heart to compete with anyone.",
+                        "Basketball games like this prove our conference is full of talented players."
                     ],
                     soccer: [
-                        "The tactical lessons learned tonight will be valuable preparation for the upcoming playoff push.",
-                        "Both teams displayed the skill and determination that defines competitive high school soccer.",
-                        "With matches like these, the remainder of the season promises continued excitement for fans."
+                        "The teamwork and strategy from tonight will definitely help in the playoffs.",
+                        "Both teams played with the kind of skill and determination that makes soccer exciting.",
+                        "Matches like this show why soccer keeps growing more popular at our school."
                     ],
                     baseball: [
-                        "The pitching and hitting displays tonight showcase the talent level in this competitive league.",
-                        "Both teams will build on tonight's performance as they continue their push toward the postseason.",
-                        "Games like these remind us why high school baseball remains such a beloved community tradition."
+                        "The pitching and hitting we saw tonight shows how talented these players really are.",
+                        "Both teams are building momentum that should carry them through the rest of the season.",
+                        "Games like this remind us why baseball has always been such a beloved sport."
                     ],
                     volleyball: [
-                        "The teamwork and communication on display tonight will serve both teams well moving forward.",
-                        "Tonight's match demonstrated the high level of volleyball being played in this conference.",
-                        "Both squads showed the resilience and skill that will be crucial in upcoming tournament play."
+                        "The communication and teamwork on display will serve both teams well moving forward.",
+                        "Tonight's match showed the high level of volleyball being played in our league.",
+                        "Both teams have the skills and determination to make some noise in the tournament."
                     ],
                     track: [
-                        "Tonight's performances set high standards for upcoming invitational meets.",
-                        "The dedication and training evident tonight will serve these athletes well at regionals.",
-                        "Performances like these showcase the growing strength of the track and field program."
+                        "Tonight's performances set the bar high for upcoming meets.",
+                        "The hard work and training these athletes put in really showed tonight.",
+                        "Performances like these prove our track program is getting stronger every year."
                     ]
                 };
                 return conclusions[sport] || conclusions.general;
