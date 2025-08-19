@@ -466,7 +466,8 @@
             <div class="section">
                 <h2><span>🏆</span> Choose Sport</h2>
                 <div class="sport-selector">
-                    <button class="sport-btn active" data-sport="football">🏈 Football</button>
+                    <button class="sport-btn active" data-sport="general">📰 General</button>
+                    <button class="sport-btn" data-sport="football">🏈 Football</button>
                     <button class="sport-btn" data-sport="basketball">🏀 Basketball</button>
                     <button class="sport-btn" data-sport="soccer">⚽ Soccer</button>
                     <button class="sport-btn" data-sport="baseball">⚾ Baseball</button>
@@ -490,13 +491,13 @@
                 </div>
                 
                 <div id="guidedQuestions" class="guided-questions">
-                    <h4>💡 Suggested Interview Questions for Football:</h4>
+                    <h4>💡 Suggested Interview Questions for General:</h4>
                     <ul id="questionsList">
-                        <li>How do you feel about your team's performance tonight?</li>
-                        <li>What was the key moment that changed the game?</li>
-                        <li>Can you walk us through that winning play?</li>
-                        <li>How did your team prepare for this opponent?</li>
-                        <li>What's next for your team this season?</li>
+                        <li>Can you tell us about this event/story?</li>
+                        <li>What happened here today?</li>
+                        <li>How do you feel about what occurred?</li>
+                        <li>What's the most important thing people should know?</li>
+                        <li>What happens next?</li>
                     </ul>
                 </div>
             </div>
@@ -505,28 +506,28 @@
             <div class="section">
                 <h2><span>📝</span> Smart Story Builder</h2>
                 <div class="input-group">
-                    <label for="eventTitle">Event Title</label>
-                    <input type="text" id="eventTitle" placeholder="e.g., Hawks defeat Eagles 28-21 in overtime thriller">
+                    <label for="eventTitle">Story Title</label>
+                    <input type="text" id="eventTitle" placeholder="e.g., New Library Opens Downtown, Student Wins Scholarship, etc.">
                 </div>
                 
                 <div class="input-group">
-                    <label for="gameScore">Score/Result</label>
-                    <input type="text" id="gameScore" placeholder="e.g., Hawks 28, Eagles 21 (OT)">
+                    <label for="gameScore">Key Details/Results</label>
+                    <input type="text" id="gameScore" placeholder="e.g., Opening ceremony at 2pm, $5000 scholarship awarded, etc.">
                 </div>
                 
                 <div class="input-group">
-                    <label for="keyPlayers">Key Players</label>
-                    <input type="text" id="keyPlayers" placeholder="e.g., John Smith (QB), Sarah Johnson (RB)">
+                    <label for="keyPlayers">Key People</label>
+                    <input type="text" id="keyPlayers" placeholder="e.g., Principal Smith, Student Jane Doe, Coach Johnson">
                 </div>
                 
                 <div class="input-group">
-                    <label for="gameHighlights">Game Highlights</label>
-                    <textarea id="gameHighlights" placeholder="Describe the most important plays, turnovers, scoring drives..."></textarea>
+                    <label for="gameHighlights">Main Points/Highlights</label>
+                    <textarea id="gameHighlights" placeholder="Describe the most important aspects of this story..."></textarea>
                 </div>
                 
                 <div class="input-group">
                     <label for="additionalNotes">Additional Context</label>
-                    <textarea id="additionalNotes" placeholder="Weather conditions, crowd size, injuries, records broken..."></textarea>
+                    <textarea id="additionalNotes" placeholder="Background information, quotes, atmosphere, significance..."></textarea>
                 </div>
 
                 <div id="aiSuggestions" class="ai-suggestions" style="display: none;">
@@ -579,11 +580,18 @@
                 this.timerInterval = null;
                 this.audioBlob = null;
                 this.photos = [];
-                this.selectedSport = 'football';
+                this.selectedSport = 'general';
                 this.recognition = null;
                 this.isTranscribing = false;
                 
                 this.sportQuestions = {
+                    general: [
+                        "Can you tell us about this event/story?",
+                        "What happened here today?",
+                        "How do you feel about what occurred?",
+                        "What's the most important thing people should know?",
+                        "What happens next?"
+                    ],
                     football: [
                         "How do you feel about your team's performance tonight?",
                         "What was the key moment that changed the game?",
@@ -760,8 +768,9 @@
             }
 
             updateGuidedQuestions() {
-                const questions = this.sportQuestions[this.selectedSport] || this.sportQuestions.football;
-                const sportName = this.selectedSport.charAt(0).toUpperCase() + this.selectedSport.slice(1);
+                const questions = this.sportQuestions[this.selectedSport] || this.sportQuestions.general;
+                const sportName = this.selectedSport === 'general' ? 'General' : 
+                                 this.selectedSport.charAt(0).toUpperCase() + this.selectedSport.slice(1);
                 
                 document.querySelector('#guidedQuestions h4').textContent = `💡 Suggested Interview Questions for ${sportName}:`;
                 
@@ -931,18 +940,21 @@
                 
                 let suggestion = '';
                 
-                if (title.includes('win') || title.includes('defeat') || title.includes('beat')) {
-                    suggestion = `💡 Great! Consider adding: final score, winning play details, and key player quotes.`;
-                } else if (title.includes('championship') || title.includes('playoff')) {
+                // General content suggestions
+                if (title.includes('win') || title.includes('award') || title.includes('achieve')) {
+                    suggestion = `🏆 Achievement story! Include: what was won/achieved, who was involved, and why it matters.`;
+                } else if (title.includes('new') || title.includes('open') || title.includes('launch')) {
+                    suggestion = `🎉 New development! Focus on: what's new, who benefits, and future impact.`;
+                } else if (title.includes('student') || title.includes('scholarship') || title.includes('graduate')) {
+                    suggestion = `🎓 Education story! Highlight: the person's background, achievement details, and future plans.`;
+                } else if (title.includes('community') || title.includes('volunteer') || title.includes('help')) {
+                    suggestion = `🤝 Community story! Emphasize: the cause, people involved, and community impact.`;
+                } else if (sport !== 'general' && (title.includes('championship') || title.includes('playoff'))) {
                     suggestion = `🏆 Big game! Include: stakes of the game, historical context, and emotional reactions.`;
-                } else if (title.includes('overtime') || title.includes('ot')) {
+                } else if (sport !== 'general' && (title.includes('overtime') || title.includes('ot'))) {
                     suggestion = `⏰ Overtime thriller! Focus on: tension moments, clutch plays, and player endurance.`;
-                } else if (sport === 'football' && (title.includes('touchdown') || title.includes('td'))) {
-                    suggestion = `🏈 Key scoring play! Describe: the drive setup, blocking, and celebration details.`;
-                } else if (sport === 'basketball' && title.includes('buzzer')) {
-                    suggestion = `🏀 Buzzer beater! Capture: the shot setup, crowd reaction, and game-winning moment.`;
                 } else if (title.length > 5) {
-                    suggestion = `📝 Good start! Add specific details like score, standout performances, and game atmosphere.`;
+                    suggestion = `📝 Good start! Based on your content, add specific quotes, details, and explain the significance.`;
                 }
                 
                 if (suggestion) {
@@ -999,94 +1011,221 @@
             }
 
             createIntelligentArticle() {
-                const title = this.eventTitle.value.trim() || `${this.selectedSport.charAt(0).toUpperCase() + this.selectedSport.slice(1)} Game Coverage`;
-                const score = this.gameScore.value.trim();
-                const players = this.keyPlayers.value.trim();
+                // Analyze the actual content to determine what type of story this is
+                const title = this.eventTitle.value.trim();
+                const details = this.gameScore.value.trim();
+                const people = this.keyPlayers.value.trim();
                 const highlights = this.gameHighlights.value.trim();
                 const notes = this.additionalNotes.value.trim();
                 const transcription = this.transcriptionArea.value.trim();
                 const sport = this.selectedSport;
                 
-                let article = `<h1>${title}</h1>\n\n`;
+                // Smart content analysis - determine story type from actual content
+                const allContent = `${title} ${details} ${highlights} ${notes} ${transcription}`.toLowerCase();
                 
-                // Smart lead paragraph based on available data
-                if (score) {
-                    const sportTerms = this.getSportTerminology(sport);
-                    article += `<p><strong>${score.split(',')[0] || 'The home team'}</strong> ${sportTerms.victory} in ${sportTerms.gameType} that showcased incredible ${sportTerms.skills} and determination from both sides.</p>\n\n`;
-                } else {
-                    article += `<p>In an exciting ${sport} matchup, both teams demonstrated the skill and intensity that makes high school sports so compelling to watch.</p>\n\n`;
+                let storyType = 'general';
+                let isGameStory = false;
+                
+                // Analyze content to determine if this is actually about a game/match
+                const gameKeywords = ['score', 'points', 'win', 'loss', 'defeat', 'beat', 'game', 'match', 'play', 'quarter', 'half', 'inning', 'set'];
+                const gameIndicators = gameKeywords.filter(keyword => allContent.includes(keyword)).length;
+                
+                if (sport !== 'general' && gameIndicators >= 2) {
+                    isGameStory = true;
+                    storyType = 'game';
+                } else if (allContent.includes('scholarship') || allContent.includes('award') || allContent.includes('honor')) {
+                    storyType = 'achievement';
+                } else if (allContent.includes('open') || allContent.includes('new') || allContent.includes('launch')) {
+                    storyType = 'opening';
+                } else if (allContent.includes('graduate') || allContent.includes('student') || allContent.includes('education')) {
+                    storyType = 'education';
+                } else if (allContent.includes('community') || allContent.includes('volunteer') || allContent.includes('help')) {
+                    storyType = 'community';
                 }
                 
-                // Game highlights section
+                // Start building the article
+                let article = '';
+                
+                // Create appropriate headline
+                if (title) {
+                    article += `<h1>${title}</h1>\n\n`;
+                } else {
+                    article += `<h1>Local News Story</h1>\n\n`;
+                }
+                
+                // Create lead paragraph based on actual content analysis
+                article += this.createLeadParagraph(storyType, isGameStory, details, allContent);
+                
+                // Main content sections based on what was actually provided
                 if (highlights) {
-                    article += `<h2>Game Highlights</h2>\n`;
-                    article += `<p>${highlights}</p>\n\n`;
-                } else {
-                    const sportTerms = this.getSportTerminology(sport);
-                    article += `<h2>Key Moments</h2>\n`;
-                    article += `<p>The game featured several momentum-shifting plays that kept spectators on the edge of their seats. Both teams showed excellent ${sportTerms.skills} throughout the contest.</p>\n\n`;
+                    article += this.createMainSection(storyType, highlights);
                 }
                 
-                // Player spotlight
-                if (players) {
-                    article += `<h2>Player Spotlight</h2>\n`;
-                    const playerList = players.split(',').map(p => p.trim());
-                    if (playerList.length > 1) {
-                        article += `<p>Outstanding performances came from ${playerList.slice(0, -1).join(', ')} and ${playerList[playerList.length - 1]}, who each played crucial roles in tonight's outcome.</p>\n\n`;
-                    } else {
-                        article += `<p>${playerList[0]} delivered an outstanding performance that was instrumental in the team's success tonight.</p>\n\n`;
-                    }
+                // People section if names were provided
+                if (people) {
+                    article += this.createPeopleSection(storyType, people);
                 }
                 
-                // Interview quotes (if transcription available)
+                // Quote section if transcription available
                 if (transcription) {
-                    article += `<h2>Post-Game Interviews</h2>\n`;
-                    const sentences = transcription.split('.').filter(s => s.trim().length > 10);
-                    if (sentences.length > 0) {
-                        // Extract meaningful quotes
-                        const quotes = sentences.slice(0, 3).map(s => s.trim() + '.');
-                        quotes.forEach(quote => {
-                            if (quote.length > 20) {
-                                article += `<blockquote>"${quote}"</blockquote>\n`;
-                            }
-                        });
-                        article += `<p>The interview revealed insights into the team's strategy and the emotions surrounding tonight's performance.</p>\n\n`;
-                    }
+                    article += this.createQuoteSection(transcription, storyType);
                 }
                 
                 // Photo section
                 if (this.photos.length > 0) {
-                    article += `<h2>Photo Gallery</h2>\n`;
-                    article += `<p>Our photographers captured the intensity and emotion of tonight's game:</p>\n\n`;
-                    
-                    this.photos.forEach((photo, index) => {
-                        const caption = photo.caption || `Action shot from tonight's ${sport} game`;
-                        article += `<div style="margin: 15px 0; text-align: center;">`;
-                        article += `<img src="${photo.dataUrl}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" alt="${caption}">`;
-                        article += `<p style="font-style: italic; color: #666; margin-top: 8px; font-size: 14px;">${caption}</p>`;
-                        article += `</div>\n`;
-                    });
+                    article += this.createPhotoSection(storyType);
                 }
                 
                 // Additional context
                 if (notes) {
-                    article += `<h2>Game Context</h2>\n`;
+                    article += `<h2>Additional Details</h2>\n`;
                     article += `<p>${notes}</p>\n\n`;
                 }
                 
-                // Smart conclusion based on sport
-                const conclusions = this.getSportConclusions(sport);
-                article += `<h2>Looking Ahead</h2>\n`;
-                article += `<p>${conclusions[Math.floor(Math.random() * conclusions.length)]}</p>\n\n`;
+                // Conclusion based on story type and content
+                article += this.createConclusion(storyType, isGameStory, sport);
                 
                 // Attribution
-                article += `<p style="font-style: italic; color: #888; font-size: 12px;">This article was generated using intelligent templates and real interview transcription technology.</p>`;
+                article += `<p style="font-style: italic; color: #888; font-size: 12px;">This article was generated using intelligent content analysis and real interview transcription.</p>`;
 
                 this.articleContent.innerHTML = article;
             }
 
+            createLeadParagraph(storyType, isGameStory, details, content) {
+                let lead = '';
+                
+                switch(storyType) {
+                    case 'game':
+                        if (details) {
+                            lead = `<p><strong>Local teams competed</strong> in what proved to be an engaging athletic contest. ${details}</p>\n\n`;
+                        } else {
+                            lead = `<p>Local athletes showcased their skills in today's competitive matchup, demonstrating the dedication and talent that defines school sports.</p>\n\n`;
+                        }
+                        break;
+                    case 'achievement':
+                        lead = `<p><strong>Recognition and achievement</strong> took center stage as local individuals were honored for their outstanding accomplishments.</p>\n\n`;
+                        break;
+                    case 'opening':
+                        lead = `<p><strong>A new chapter begins</strong> as the community welcomes an exciting addition that promises to benefit many.</p>\n\n`;
+                        break;
+                    case 'education':
+                        lead = `<p><strong>Educational excellence</strong> continues to shine as students and educators achieve remarkable milestones.</p>\n\n`;
+                        break;
+                    case 'community':
+                        lead = `<p><strong>Community spirit</strong> was on full display as local residents came together for a meaningful cause.</p>\n\n`;
+                        break;
+                    default:
+                        if (details) {
+                            lead = `<p><strong>Local news</strong> highlights an important story affecting our community. ${details}</p>\n\n`;
+                        } else {
+                            lead = `<p>A significant development in our community deserves attention and recognition.</p>\n\n`;
+                        }
+                }
+                
+                return lead;
+            }
+
+            createMainSection(storyType, highlights) {
+                let section = '';
+                const sectionTitle = storyType === 'game' ? 'Key Moments' : 'Highlights';
+                
+                section += `<h2>${sectionTitle}</h2>\n`;
+                section += `<p>${highlights}</p>\n\n`;
+                
+                return section;
+            }
+
+            createPeopleSection(storyType, people) {
+                let section = '';
+                const peopleList = people.split(',').map(p => p.trim());
+                
+                section += `<h2>Key Individuals</h2>\n`;
+                
+                if (peopleList.length > 1) {
+                    section += `<p>This story involves several important individuals: ${peopleList.slice(0, -1).join(', ')} and ${peopleList[peopleList.length - 1]}. Each played a crucial role in today's events.</p>\n\n`;
+                } else {
+                    section += `<p>${peopleList[0]} was instrumental in today's story, demonstrating leadership and commitment.</p>\n\n`;
+                }
+                
+                return section;
+            }
+
+            createQuoteSection(transcription, storyType) {
+                let section = '';
+                
+                section += `<h2>Interviews</h2>\n`;
+                
+                // Extract meaningful sentences from transcription
+                const sentences = transcription.split(/[.!?]+/).filter(s => s.trim().length > 15);
+                
+                if (sentences.length > 0) {
+                    // Use first few meaningful sentences as quotes
+                    const quotes = sentences.slice(0, 3).map(s => s.trim());
+                    quotes.forEach(quote => {
+                        if (quote.length > 20) {
+                            section += `<blockquote>"${quote}."</blockquote>\n`;
+                        }
+                    });
+                    section += `<p>These firsthand accounts provide valuable insight into the significance and impact of today's events.</p>\n\n`;
+                } else {
+                    section += `<p>Interviews conducted provide valuable perspectives on the importance and impact of these events.</p>\n\n`;
+                }
+                
+                return section;
+            }
+
+            createPhotoSection(storyType) {
+                let section = '';
+                
+                section += `<h2>Photo Coverage</h2>\n`;
+                section += `<p>Our photography captures the essence and importance of this story:</p>\n\n`;
+                
+                this.photos.forEach((photo, index) => {
+                    const caption = photo.caption || `Image ${index + 1} from today's coverage`;
+                    section += `<div style="margin: 15px 0; text-align: center;">`;
+                    section += `<img src="${photo.dataUrl}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" alt="${caption}">`;
+                    section += `<p style="font-style: italic; color: #666; margin-top: 8px; font-size: 14px;">${caption}</p>`;
+                    section += `</div>\n`;
+                });
+                
+                return section;
+            }
+
+            createConclusion(storyType, isGameStory, sport) {
+                let conclusion = '';
+                
+                conclusion += `<h2>Looking Forward</h2>\n`;
+                
+                switch(storyType) {
+                    case 'game':
+                        conclusion += `<p>Both teams demonstrated skill and sportsmanship that reflects positively on their programs and the community's support for athletics.</p>\n\n`;
+                        break;
+                    case 'achievement':
+                        conclusion += `<p>These achievements reflect the dedication and hard work that make our community proud and inspire others to pursue excellence.</p>\n\n`;
+                        break;
+                    case 'opening':
+                        conclusion += `<p>This new addition to our community represents progress and opportunity, promising positive impact for years to come.</p>\n\n`;
+                        break;
+                    case 'education':
+                        conclusion += `<p>Educational achievements like these highlight the commitment to learning and growth that defines our community's values.</p>\n\n`;
+                        break;
+                    case 'community':
+                        conclusion += `<p>Community involvement and cooperation like this demonstrate the spirit that makes our area a special place to live and work.</p>\n\n`;
+                        break;
+                    default:
+                        conclusion += `<p>This story represents the kind of community engagement and achievement that makes our area a vibrant and thriving place.</p>\n\n`;
+                }
+                
+                return conclusion;
+            }
+
             getSportTerminology(sport) {
                 const terms = {
+                    general: {
+                        victory: 'achieved success',
+                        gameType: 'an important event',
+                        skills: 'dedication and commitment'
+                    },
                     football: {
                         victory: 'secured the victory',
                         gameType: 'a hard-fought battle',
@@ -1118,11 +1257,16 @@
                         skills: 'speed and endurance'
                     }
                 };
-                return terms[sport] || terms.football;
+                return terms[sport] || terms.general;
             }
 
             getSportConclusions(sport) {
                 const conclusions = {
+                    general: [
+                        "This story represents the kind of community engagement that makes our area special.",
+                        "Events like these highlight the positive impact individuals can have on their community.",
+                        "The dedication shown here serves as an inspiration for others in our community."
+                    ],
                     football: [
                         "Both teams will use tonight's experience to prepare for their upcoming conference matchups.",
                         "The coaching staff will review game film to build on tonight's successes for the remainder of the season.",
@@ -1154,7 +1298,7 @@
                         "Performances like these showcase the growing strength of the track and field program."
                     ]
                 };
-                return conclusions[sport] || conclusions.football;
+                return conclusions[sport] || conclusions.general;
             }
 
             copyArticle() {
