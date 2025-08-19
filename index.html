@@ -568,7 +568,11 @@
             <div id="articleOutput" class="article-output">
                 <h3>📄 Your Generated Article</h3>
                 <div id="articleContent" class="article-content"></div>
-                <button id="copyBtn" class="copy-btn">📋 Copy Article</button>
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <button id="copyBtn" class="copy-btn">📋 Copy Article</button>
+                    <button id="emailBtn" class="copy-btn" style="background: #e74c3c;">📧 Email Article</button>
+                    <button id="driveBtn" class="copy-btn" style="background: #4285f4;">💾 Save to Drive</button>
+                </div>
             </div>
         </div>
     </div>
@@ -661,6 +665,8 @@
                 this.articleOutput = document.getElementById('articleOutput');
                 this.articleContent = document.getElementById('articleContent');
                 this.copyBtn = document.getElementById('copyBtn');
+                this.emailBtn = document.getElementById('emailBtn');
+                this.driveBtn = document.getElementById('driveBtn');
                 this.eventTitle = document.getElementById('eventTitle');
                 this.gameScore = document.getElementById('gameScore');
                 this.keyPlayers = document.getElementById('keyPlayers');
@@ -689,6 +695,8 @@
                 // Article generation
                 this.generateBtn.addEventListener('click', () => this.generateSmartArticle());
                 this.copyBtn.addEventListener('click', () => this.copyArticle());
+                this.emailBtn.addEventListener('click', () => this.emailArticle());
+                this.driveBtn.addEventListener('click', () => this.saveToGoogleDrive());
 
                 // Smart suggestions
                 this.eventTitle.addEventListener('input', () => this.provideSuggestions());
@@ -1473,6 +1481,130 @@
                     setTimeout(() => {
                         this.copyBtn.textContent = '📋 Copy Article';
                     }, 2000);
+                });
+            }
+
+            emailArticle() {
+                const title = this.eventTitle.value.trim() || 'Sideline Reporter Article';
+                const text = this.articleContent.innerText;
+                
+                // Create email content
+                const subject = encodeURIComponent(`Article: ${title}`);
+                const body = encodeURIComponent(`Hi,
+
+I've written a new article using Sideline Reporter:
+
+${title}
+
+${text}
+
+Best regards,
+Sideline Reporter Team`);
+                
+                // Create mailto link
+                const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+                
+                // Try to open email client
+                try {
+                    window.location.href = mailtoLink;
+                    this.emailBtn.textContent = '✅ Email Opened!';
+                    setTimeout(() => {
+                        this.emailBtn.textContent = '📧 Email Article';
+                    }, 3000);
+                } catch (error) {
+                    // Fallback: Copy email content to clipboard
+                    const emailContent = `Subject: ${title}\n\n${text}`;
+                    navigator.clipboard.writeText(emailContent).then(() => {
+                        alert('Email content copied to clipboard! Paste it into your email app.');
+                        this.emailBtn.textContent = '📋 Email Copied!';
+                        setTimeout(() => {
+                            this.emailBtn.textContent = '📧 Email Article';
+                        }, 3000);
+                    });
+                }
+            }
+
+            saveToGoogleDrive() {
+                const title = this.eventTitle.value.trim() || 'Sideline Reporter Article';
+                const text = this.articleContent.innerText;
+                const timestamp = new Date().toLocaleString();
+                
+                // Create Google Docs content
+                const docContent = `${title}
+
+Generated: ${timestamp}
+Created with: Sideline Reporter App
+
+${text}`;
+                
+                // Try Google Drive integration
+                this.driveBtn.textContent = '⏳ Opening Drive...';
+                
+                try {
+                    // Method 1: Try Google Docs direct creation
+                    const encodedContent = encodeURIComponent(docContent);
+                    const googleDocsUrl = `https://docs.google.com/document/create?title=${encodeURIComponent(title)}&content=${encodedContent}`;
+                    
+                    // Open Google Docs in new window/tab
+                    const driveWindow = window.open(googleDocsUrl, '_blank');
+                    
+                    if (driveWindow) {
+                        this.driveBtn.textContent = '✅ Drive Opened!';
+                        setTimeout(() => {
+                            this.driveBtn.textContent = '💾 Save to Drive';
+                        }, 3000);
+                        
+                        // Show instructions
+                        setTimeout(() => {
+                            alert('Google Docs opened! Copy and paste your article content into the new document.');
+                        }, 1000);
+                    } else {
+                        // Fallback if popup blocked
+                        this.showDriveInstructions(title, docContent);
+                    }
+                } catch (error) {
+                    this.showDriveInstructions(title, docContent);
+                }
+            }
+
+            showDriveInstructions(title, content) {
+                // Copy content to clipboard and show instructions
+                navigator.clipboard.writeText(content).then(() => {
+                    this.driveBtn.textContent = '📋 Content Copied!';
+                    setTimeout(() => {
+                        this.driveBtn.textContent = '💾 Save to Drive';
+                    }, 3000);
+                    
+                    const instructions = `
+Article content copied to clipboard!
+
+To save to Google Drive:
+1. Go to drive.google.com
+2. Click "New" → "Google Docs"
+3. Paste your article (Ctrl+V / Cmd+V)
+4. Save with title: "${title}"
+
+Or use the alternative method:
+1. Go to docs.google.com
+2. Create new document
+3. Paste your content
+                    `;
+                    
+                    alert(instructions);
+                }).catch(() => {
+                    // Last resort: Show manual instructions
+                    alert(`
+To save your article to Google Drive:
+
+1. Copy your article text from above
+2. Go to drive.google.com
+3. Click "New" → "Google Docs"  
+4. Paste your article
+5. Save as: "${title}"
+
+Your article is ready to copy from the screen above.`);
+                    
+                    this.driveBtn.textContent = '💾 Save to Drive';
                 });
             }
         }
