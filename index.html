@@ -646,6 +646,7 @@
             initializeElements() {
                 this.recordBtn = document.getElementById('recordBtn');
                 this.transcribeBtn = document.getElementById('transcribeBtn');
+                this.transcribeRecordingBtn = document.getElementById('transcribeRecordingBtn');
                 this.timer = document.getElementById('timer');
                 this.audioContainer = document.getElementById('audioContainer');
                 this.transcriptionArea = document.getElementById('transcriptionArea');
@@ -677,7 +678,8 @@
 
                 // Recording controls
                 this.recordBtn.addEventListener('click', () => this.toggleRecording());
-                this.transcribeBtn.addEventListener('click', () => this.startTranscription());
+                this.transcribeBtn.addEventListener('click', () => this.startLiveTranscription());
+                this.transcribeRecordingBtn.addEventListener('click', () => this.transcribeFromRecording());
 
                 // Photo handling
                 this.photoUpload.addEventListener('click', () => this.photoInput.click());
@@ -828,6 +830,8 @@
                         this.audioBlob = new Blob(this.audioChunks, { type: mimeType || 'audio/webm' });
                         this.createAudioPlayer();
                         this.transcribeBtn.disabled = false;
+                        this.transcribeRecordingBtn.disabled = false;
+                        this.transcribeRecordingBtn.style.display = 'inline-block';
                         this.updateStatus();
                     };
                     
