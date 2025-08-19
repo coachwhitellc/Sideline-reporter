@@ -1171,7 +1171,7 @@
             }
 
             createIntelligentArticle() {
-                // Analyze the actual content to determine what type of story this is
+                // Get all content
                 const title = this.eventTitle.value.trim();
                 const details = this.gameScore.value.trim();
                 const people = this.keyPlayers.value.trim();
@@ -1180,75 +1180,238 @@
                 const transcription = this.transcriptionArea.value.trim();
                 const sport = this.selectedSport;
                 
-                // Smart content analysis - determine story type from actual content
-                const allContent = `${title} ${details} ${highlights} ${notes} ${transcription}`.toLowerCase();
-                
-                let storyType = 'general';
-                let isGameStory = false;
-                
-                // Analyze content to determine if this is actually about a game/match
-                const gameKeywords = ['score', 'points', 'win', 'loss', 'defeat', 'beat', 'game', 'match', 'play', 'quarter', 'half', 'inning', 'set'];
-                const gameIndicators = gameKeywords.filter(keyword => allContent.includes(keyword)).length;
-                
-                if (sport !== 'general' && gameIndicators >= 2) {
-                    isGameStory = true;
-                    storyType = 'game';
-                } else if (allContent.includes('scholarship') || allContent.includes('award') || allContent.includes('honor')) {
-                    storyType = 'achievement';
-                } else if (allContent.includes('open') || allContent.includes('new') || allContent.includes('launch')) {
-                    storyType = 'opening';
-                } else if (allContent.includes('graduate') || allContent.includes('student') || allContent.includes('education')) {
-                    storyType = 'education';
-                } else if (allContent.includes('community') || allContent.includes('volunteer') || allContent.includes('help')) {
-                    storyType = 'community';
-                }
-                
-                // Start building the article
+                // PRIORITIZE INTERVIEW/TRANSCRIPTION CONTENT
                 let article = '';
+                let storyType = 'general';
+                let mainContent = '';
+                let quotesToUse = [];
                 
-                // Create appropriate headline
-                if (title) {
-                    article += `<h1>${title}</h1>\n\n`;
+                // If we have interview content, make it the foundation
+                if (transcription && transcription.length > 20) {
+                    // Analyze the transcription to determine story type and extract quotes
+                    const analysisResult = this.analyzeTranscription(transcription);
+                    storyType = analysisResult.storyType;
+                    mainContent = analysisResult.mainContent;
+                    quotesToUse = analysisResult.quotes;
+                    
+                    // Create headline based on interview content
+                    if (!title && analysisResult.suggestedTitle) {
+                        article += `<h1>${analysisResult.suggestedTitle}</h1>\n\n`;
+                    } else if (title) {
+                        article += `<h1>${title}</h1>\n\n`;
+                    } else {
+                        article += `<h1>Interview Reveals ${this.capitalizeFirst(storyType)} Story</h1>\n\n`;
+                    }
+                    
+                    // Lead paragraph based on interview content
+                    article += this.createInterviewBasedLead(analysisResult, details);
+                    
+                    // Main story content from interview
+                    if (mainContent) {
+                        article += `<h2>The Story</h2>\n`;
+                        article += `<p>${mainContent}</p>\n\n`;
+                    }
+                    
+                    // Key quotes section (primary content)
+                    if (quotesToUse.length > 0) {
+                        article += `<h2>Key Interview Highlights</h2>\n`;
+                        quotesToUse.forEach(quote => {
+                            article += `<blockquote>"${quote}"</blockquote>\n`;
+                        });
+                        article += `<p>These insights from our interview reveal the heart of this story.</p>\n\n`;
+                    }
+                    
+                    // SUPPLEMENTARY sections (only if provided)
+                    if (highlights && highlights.trim()) {
+                        article += `<h2>Additional Details</h2>\n`;
+                        article += `<p>${highlights}</p>\n\n`;
+                    }
+                    
+                    if (people && people.trim()) {
+                        article += this.createPeopleSection(storyType, people);
+                    }
+                    
                 } else {
-                    article += `<h1>Local News Story</h1>\n\n`;
+                    // Fallback: Use other fields if no interview content
+                    const allContent = `${title} ${details} ${highlights} ${notes}`.toLowerCase();
+                    storyType = this.determineStoryTypeFromFields(allContent, sport);
+                    
+                    if (title) {
+                        article += `<h1>${title}</h1>\n\n`;
+                    } else {
+                        article += `<h1>Local News Story</h1>\n\n`;
+                    }
+                    
+                    article += this.createLeadParagraph(storyType, false, details, allContent);
+                    
+                    if (highlights) {
+                        article += this.createMainSection(storyType, highlights);
+                    }
+                    
+                    if (people) {
+                        article += this.createPeopleSection(storyType, people);
+                    }
                 }
                 
-                // Create lead paragraph based on actual content analysis
-                article += this.createLeadParagraph(storyType, isGameStory, details, allContent);
-                
-                // Main content sections based on what was actually provided
-                if (highlights) {
-                    article += this.createMainSection(storyType, highlights);
-                }
-                
-                // People section if names were provided
-                if (people) {
-                    article += this.createPeopleSection(storyType, people);
-                }
-                
-                // Quote section if transcription available
-                if (transcription) {
-                    article += this.createQuoteSection(transcription, storyType);
-                }
-                
-                // Photo section
+                // Photo section (always supplementary)
                 if (this.photos.length > 0) {
                     article += this.createPhotoSection(storyType);
                 }
                 
-                // Additional context
-                if (notes) {
-                    article += `<h2>Additional Details</h2>\n`;
+                // Additional context (always supplementary)
+                if (notes && notes.trim()) {
+                    article += `<h2>Background Information</h2>\n`;
                     article += `<p>${notes}</p>\n\n`;
                 }
                 
-                // Conclusion based on story type and content
-                article += this.createConclusion(storyType, isGameStory, sport);
+                // Conclusion based on interview insights or story type
+                article += this.createConclusion(storyType, false, sport);
                 
                 // Attribution
-                article += `<p style="font-style: italic; color: #888; font-size: 12px;">This article was generated using intelligent content analysis and real interview transcription.</p>`;
+                if (transcription && transcription.length > 20) {
+                    article += `<p style="font-style: italic; color: #888; font-size: 12px;">This article was generated from interview transcription with supplementary reporting details.</p>`;
+                } else {
+                    article += `<p style="font-style: italic; color: #888; font-size: 12px;">This article was generated using intelligent content analysis and reporting templates.</p>`;
+                }
 
                 this.articleContent.innerHTML = article;
+            }
+
+            analyzeTranscription(transcription) {
+                // Extract meaningful content from interview
+                const sentences = transcription.split(/[.!?]+/).filter(s => s.trim().length > 15);
+                const fullText = transcription.toLowerCase();
+                
+                let storyType = 'general';
+                let suggestedTitle = '';
+                let mainContent = '';
+                let quotes = [];
+                
+                // Determine story type from actual interview content
+                if (fullText.includes('win') || fullText.includes('won') || fullText.includes('victory') || fullText.includes('beat')) {
+                    storyType = 'victory';
+                } else if (fullText.includes('scholarship') || fullText.includes('award') || fullText.includes('honor')) {
+                    storyType = 'achievement';
+                } else if (fullText.includes('graduate') || fullText.includes('graduation') || fullText.includes('degree')) {
+                    storyType = 'education';
+                } else if (fullText.includes('open') || fullText.includes('new') || fullText.includes('launch')) {
+                    storyType = 'opening';
+                } else if (fullText.includes('help') || fullText.includes('volunteer') || fullText.includes('community')) {
+                    storyType = 'community';
+                } else if (fullText.includes('score') || fullText.includes('game') || fullText.includes('play')) {
+                    storyType = 'sports';
+                }
+                
+                // Extract best quotes (meaningful sentences)
+                quotes = sentences
+                    .filter(s => s.trim().length > 25 && s.trim().length < 150)
+                    .slice(0, 4)
+                    .map(s => s.trim());
+                
+                // Generate main content summary from interview
+                if (sentences.length > 0) {
+                    // Create a narrative from the interview content
+                    const keyPoints = sentences
+                        .filter(s => s.trim().length > 30)
+                        .slice(0, 3);
+                    
+                    if (keyPoints.length > 0) {
+                        mainContent = this.createNarrativeFromInterview(keyPoints, storyType);
+                    }
+                }
+                
+                // Suggest title based on interview content
+                if (fullText.includes('championship') || fullText.includes('title')) {
+                    suggestedTitle = 'Championship Victory Celebrated';
+                } else if (fullText.includes('scholarship')) {
+                    suggestedTitle = 'Local Student Receives Scholarship';
+                } else if (fullText.includes('graduate')) {
+                    suggestedTitle = 'Graduate Reflects on Achievement';
+                } else if (storyType === 'victory') {
+                    suggestedTitle = 'Victory Brings Joy and Pride';
+                } else if (storyType === 'community') {
+                    suggestedTitle = 'Community Effort Makes Difference';
+                }
+                
+                return {
+                    storyType,
+                    suggestedTitle,
+                    mainContent,
+                    quotes
+                };
+            }
+
+            createNarrativeFromInterview(keyPoints, storyType) {
+                // Convert interview points into flowing narrative
+                let narrative = '';
+                
+                switch(storyType) {
+                    case 'victory':
+                    case 'sports':
+                        narrative = `The excitement was evident as details of the victory emerged. ${keyPoints[0]}. The significance of this achievement extends beyond the immediate celebration, reflecting months of preparation and dedication.`;
+                        break;
+                    case 'achievement':
+                        narrative = `This recognition represents years of hard work and commitment. ${keyPoints[0]}. The achievement stands as an inspiration to others pursuing similar goals.`;
+                        break;
+                    case 'education':
+                        narrative = `The educational milestone marks an important transition. ${keyPoints[0]}. This accomplishment opens new doors and opportunities for the future.`;
+                        break;
+                    case 'community':
+                        narrative = `Community involvement has made a tangible difference. ${keyPoints[0]}. The impact of these efforts extends far beyond what was initially expected.`;
+                        break;
+                    default:
+                        narrative = `Our interview revealed important insights about this developing story. ${keyPoints[0]}. The implications of these events continue to unfold.`;
+                }
+                
+                return narrative;
+            }
+
+            createInterviewBasedLead(analysisResult, details) {
+                let lead = '';
+                const storyType = analysisResult.storyType;
+                
+                if (details) {
+                    lead = `<p><strong>In an exclusive interview,</strong> we learned about ${details.toLowerCase()}. The conversation revealed insights that bring this story to life.</p>\n\n`;
+                } else {
+                    switch(storyType) {
+                        case 'victory':
+                        case 'sports':
+                            lead = `<p><strong>Speaking with those involved,</strong> the emotion and significance of this victory became clear. The interview provided firsthand insights into what this achievement truly means.</p>\n\n`;
+                            break;
+                        case 'achievement':
+                            lead = `<p><strong>Through our conversation,</strong> the hard work and dedication behind this achievement came to light. The interview revealed the personal journey that led to this moment.</p>\n\n`;
+                            break;
+                        case 'education':
+                            lead = `<p><strong>Our interview highlighted</strong> the importance of this educational milestone. The conversation provided valuable perspective on the journey and what lies ahead.</p>\n\n`;
+                            break;
+                        case 'community':
+                            lead = `<p><strong>Talking with community members</strong> revealed the true impact of these efforts. The interview showed how individual actions can create meaningful change.</p>\n\n`;
+                            break;
+                        default:
+                            lead = `<p><strong>Our conversation provided valuable insights</strong> into this developing story. The interview revealed details that help us understand what really happened.</p>\n\n`;
+                    }
+                }
+                
+                return lead;
+            }
+
+            determineStoryTypeFromFields(allContent, sport) {
+                if (sport !== 'general' && (allContent.includes('score') || allContent.includes('win'))) {
+                    return 'sports';
+                } else if (allContent.includes('scholarship') || allContent.includes('award')) {
+                    return 'achievement';
+                } else if (allContent.includes('open') || allContent.includes('new')) {
+                    return 'opening';
+                } else if (allContent.includes('graduate') || allContent.includes('student')) {
+                    return 'education';
+                } else if (allContent.includes('community') || allContent.includes('volunteer')) {
+                    return 'community';
+                }
+                return 'general';
+            }
+
+            capitalizeFirst(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
             }
 
             createLeadParagraph(storyType, isGameStory, details, content) {
