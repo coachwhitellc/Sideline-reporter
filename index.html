@@ -792,8 +792,31 @@
 
             async startRecording() {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    this.mediaRecorder = new MediaRecorder(stream);
+                    // Request specific audio constraints for better iPhone compatibility
+                    const constraints = {
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    // Use supported MIME type for iPhone
+                    let mimeType = 'audio/webm;codecs=opus';
+                    if (!MediaRecorder.isTypeSupported(mimeType)) {
+                        mimeType = 'audio/mp4';
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            mimeType = 'audio/webm';
+                            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                                mimeType = ''; // Let browser choose
+                            }
+                        }
+                    }
+                    
+                    const options = mimeType ? { mimeType } : {};
+                    this.mediaRecorder = new MediaRecorder(stream, options);
                     this.audioChunks = [];
                     
                     this.mediaRecorder.ondataavailable = (event) => {
@@ -801,7 +824,8 @@
                     };
                     
                     this.mediaRecorder.onstop = () => {
-                        this.audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        // Use the same MIME type for blob creation
+                        this.audioBlob = new Blob(this.audioChunks, { type: mimeType || 'audio/webm' });
                         this.createAudioPlayer();
                         this.transcribeBtn.disabled = false;
                         this.updateStatus();
@@ -816,7 +840,8 @@
                     this.recordBtn.textContent = '⏹️ Stop Recording';
                     
                 } catch (error) {
-                    alert('Error accessing microphone. Please ensure you have granted microphone permissions.');
+                    console.error('Recording error:', error);
+                    alert('Error accessing microphone. Please ensure you have granted microphone permissions and try again.');
                 }
             }
 
@@ -852,8 +877,61 @@
                 const audio = document.createElement('audio');
                 audio.controls = true;
                 audio.className = 'audio-player';
-                audio.src = URL.createObjectURL(this.audioBlob);
+                audio.preload = 'auto';
+                
+                // Create object URL and handle cleanup
+                const audioURL = URL.createObjectURL(this.audioBlob);
+                audio.src = audioURL;
+                
+                // Add iPhone-specific attributes for better compatibility
+                audio.setAttribute('webkit-playsinline', 'true');
+                audio.setAttribute('playsinline', 'true');
+                
+                // Handle load errors
+                audio.onerror = (e) => {
+                    console.log('Audio error:', e);
+                    // Try creating with different mime type
+                    this.createFallbackAudioPlayer();
+                };
+                
+                // Cleanup URL when audio is removed
+                audio.addEventListener('loadstart', () => {
+                    setTimeout(() => URL.revokeObjectURL(audioURL), 1000);
+                });
+                
                 this.audioContainer.appendChild(audio);
+                
+                // Force load the audio
+                audio.load();
+            }
+
+            createFallbackAudioPlayer() {
+                // Fallback method for iPhone compatibility
+                this.audioContainer.innerHTML = '';
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.className = 'audio-player';
+                audio.preload = 'auto';
+                
+                // Try different blob type for iPhone
+                const fallbackBlob = new Blob(this.audioChunks, { type: 'audio/mpeg' });
+                const audioURL = URL.createObjectURL(fallbackBlob);
+                audio.src = audioURL;
+                
+                audio.setAttribute('webkit-playsinline', 'true');
+                audio.setAttribute('playsinline', 'true');
+                
+                this.audioContainer.appendChild(audio);
+                audio.load();
+                
+                // Add a note for user
+                const note = document.createElement('p');
+                note.style.fontSize = '12px';
+                note.style.color = '#666';
+                note.style.textAlign = 'center';
+                note.style.marginTop = '5px';
+                note.textContent = 'If audio doesn\'t play, try using headphones or check volume settings.';
+                this.audioContainer.appendChild(note);
             }
 
             startTranscription() {
