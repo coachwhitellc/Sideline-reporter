@@ -1649,42 +1649,96 @@
 
             emailArticle() {
                 const title = this.eventTitle.value.trim() || 'Sideline Reporter Article';
-                const text = this.articleContent.innerText;
+                const htmlContent = this.articleContent.innerHTML;
+                const textContent = this.articleContent.innerText;
                 
-                // Create email content
-                const subject = encodeURIComponent(`Article: ${title}`);
-                const body = encodeURIComponent(`Hi,
-
-I've written a new article using Sideline Reporter:
-
-${title}
-
-${text}
-
-Best regards,
-Sideline Reporter Team`);
-                
-                // Create mailto link
-                const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-                
-                // Try to open email client
-                try {
-                    window.location.href = mailtoLink;
-                    this.emailBtn.textContent = '✅ Email Opened!';
-                    setTimeout(() => {
-                        this.emailBtn.textContent = '📧 Email Article';
-                    }, 3000);
-                } catch (error) {
-                    // Fallback: Copy email content to clipboard
-                    const emailContent = `Subject: ${title}\n\n${text}`;
-                    navigator.clipboard.writeText(emailContent).then(() => {
-                        alert('Email content copied to clipboard! Paste it into your email app.');
-                        this.emailBtn.textContent = '📋 Email Copied!';
+                // Check if device supports sharing API first
+                if (navigator.share) {
+                    navigator.share({
+                        title: `Article: ${title}`,
+                        text: textContent,
+                        url: window.location.href
+                    }).then(() => {
+                        this.emailBtn.textContent = '✅ Shared!';
                         setTimeout(() => {
                             this.emailBtn.textContent = '📧 Email Article';
                         }, 3000);
+                    }).catch(() => {
+                        this.fallbackEmailMethod(title, textContent);
                     });
+                } else {
+                    this.fallbackEmailMethod(title, textContent);
                 }
+            }
+
+            fallbackEmailMethod(title, textContent) {
+                // Create a more compatible email approach
+                const subject = `Article: ${title}`;
+                const body = `Hi!
+
+I wrote this article using Sideline Reporter:
+
+${title}
+
+${textContent}
+
+Best,
+Student Reporter`;
+                
+                // Try different email methods
+                const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                // For mobile devices, try opening email directly
+                if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                    try {
+                        // Create a temporary link and click it
+                        const link = document.createElement('a');
+                        link.href = mailtoLink;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        this.emailBtn.textContent = '✅ Email App Opened!';
+                        setTimeout(() => {
+                            this.emailBtn.textContent = '📧 Email Article';
+                        }, 3000);
+                    } catch (error) {
+                        this.copyEmailToClipboard(title, textContent);
+                    }
+                } else {
+                    // For desktop, try window.open
+                    try {
+                        window.open(mailtoLink, '_self');
+                        this.emailBtn.textContent = '✅ Email Opened!';
+                        setTimeout(() => {
+                            this.emailBtn.textContent = '📧 Email Article';
+                        }, 3000);
+                    } catch (error) {
+                        this.copyEmailToClipboard(title, textContent);
+                    }
+                }
+            }
+
+            copyEmailToClipboard(title, textContent) {
+                const emailContent = `Subject: Article - ${title}
+
+${textContent}
+
+---
+Generated with Sideline Reporter App`;
+                
+                navigator.clipboard.writeText(emailContent).then(() => {
+                    alert('📧 Email content copied to clipboard! Paste it into your email app.');
+                    this.emailBtn.textContent = '📋 Copied for Email!';
+                    setTimeout(() => {
+                        this.emailBtn.textContent = '📧 Email Article';
+                    }, 3000);
+                }).catch(() => {
+                    // Last resort - show the content in an alert
+                    const shortContent = textContent.substring(0, 200) + '...';
+                    alert(`📧 Copy this content for your email:\n\nSubject: ${title}\n\n${shortContent}\n\n(Full article text is visible on screen above)`);
+                    this.emailBtn.textContent = '📧 Email Article';
+                });
             }
 
             saveToGoogleDrive() {
