@@ -646,7 +646,6 @@
             initializeElements() {
                 this.recordBtn = document.getElementById('recordBtn');
                 this.transcribeBtn = document.getElementById('transcribeBtn');
-                this.transcribeRecordingBtn = document.getElementById('transcribeRecordingBtn');
                 this.timer = document.getElementById('timer');
                 this.audioContainer = document.getElementById('audioContainer');
                 this.transcriptionArea = document.getElementById('transcriptionArea');
@@ -678,8 +677,7 @@
 
                 // Recording controls
                 this.recordBtn.addEventListener('click', () => this.toggleRecording());
-                this.transcribeBtn.addEventListener('click', () => this.startLiveTranscription());
-                this.transcribeRecordingBtn.addEventListener('click', () => this.transcribeFromRecording());
+                this.transcribeBtn.addEventListener('click', () => this.toggleTranscription());
 
                 // Photo handling
                 this.photoUpload.addEventListener('click', () => this.photoInput.click());
@@ -748,11 +746,11 @@
 
                     this.recognition.onerror = (event) => {
                         this.transcriptionStatus.textContent = `Error: ${event.error}`;
-                        this.stopTranscription();
+                        this.stopLiveTranscription();
                     };
 
                     this.recognition.onend = () => {
-                        this.stopTranscription();
+                        this.stopLiveTranscription();
                     };
                 } else {
                     this.transcriptionStatus.textContent = 'Speech recognition not supported in this browser';
@@ -938,36 +936,106 @@
                 this.audioContainer.appendChild(note);
             }
 
-            startTranscription() {
+            startLiveTranscription() {
                 if (!this.recognition) {
-                    alert('Speech recognition not supported in this browser');
+                    alert('Speech recognition not supported in this browser. Please use Safari on iPhone for best results.');
                     return;
                 }
 
                 if (this.isTranscribing) {
-                    this.stopTranscription();
+                    this.stopLiveTranscription();
                     return;
                 }
 
                 this.isTranscribing = true;
-                this.transcribeBtn.textContent = '⏹️ Stop Transcribing';
-                this.transcriptionStatus.textContent = 'Starting transcription...';
+                this.transcribeBtn.textContent = '⏹️ Stop Live Transcribe';
+                this.transcriptionStatus.textContent = 'Starting live transcription...';
                 
                 try {
                     this.recognition.start();
                 } catch (error) {
                     this.transcriptionStatus.textContent = 'Error starting transcription';
-                    this.stopTranscription();
+                    this.stopLiveTranscription();
                 }
             }
 
-            stopTranscription() {
+            stopLiveTranscription() {
                 if (this.recognition && this.isTranscribing) {
                     this.recognition.stop();
                 }
                 this.isTranscribing = false;
-                this.transcribeBtn.textContent = '📝 Start Transcribing';
-                this.transcriptionStatus.textContent = 'Transcription stopped';
+                this.transcribeBtn.textContent = '📝 Live Transcribe';
+                this.transcriptionStatus.textContent = 'Live transcription stopped';
+            }
+
+            async transcribeFromRecording() {
+                if (!this.audioBlob) {
+                    alert('No recording available to transcribe. Please record something first.');
+                    return;
+                }
+
+                this.transcribeRecordingBtn.disabled = true;
+                this.transcribeRecordingBtn.textContent = '⏳ Processing...';
+                this.transcriptionStatus.textContent = 'Processing recording for transcription...';
+
+                try {
+                    // Create a temporary audio element to play the recording for transcription
+                    const audio = document.createElement('audio');
+                    audio.src = URL.createObjectURL(this.audioBlob);
+                    audio.style.display = 'none';
+                    document.body.appendChild(audio);
+
+                    // Show instructions to user
+                    this.transcriptionStatus.textContent = 'Playing recording - speech recognition will capture it automatically...';
+                    
+                    // Start speech recognition
+                    if (this.recognition) {
+                        this.recognition.start();
+                        
+                        // Play the audio for transcription
+                        await audio.play();
+                        
+                        // Stop recognition when audio ends
+                        audio.onended = () => {
+                            setTimeout(() => {
+                                if (this.recognition) {
+                                    this.recognition.stop();
+                                }
+                                this.transcriptionStatus.textContent = 'Recording transcription complete';
+                                this.transcribeRecordingBtn.disabled = false;
+                                this.transcribeRecordingBtn.textContent = '🎵 Transcribe Recording';
+                            }, 2000);
+                        };
+                    } else {
+                        // Fallback: Manual transcription prompt
+                        this.showManualTranscriptionHelp();
+                    }
+
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(audio);
+                        URL.revokeObjectURL(audio.src);
+                    }, 5000);
+
+                } catch (error) {
+                    console.error('Transcription error:', error);
+                    this.transcriptionStatus.textContent = 'Error during transcription. Try the manual method below.';
+                    this.transcribeRecordingBtn.disabled = false;
+                    this.transcribeRecordingBtn.textContent = '🎵 Transcribe Recording';
+                    this.showManualTranscriptionHelp();
+                }
+            }
+
+            showManualTranscriptionHelp() {
+                this.transcriptionStatus.innerHTML = `
+                    <strong>Manual Transcription:</strong><br>
+                    1. Play your recording using the audio controls above<br>
+                    2. Click "📝 Live Transcribe" and speak into your phone<br>
+                    3. Repeat what you hear from the recording<br>
+                    4. The app will transcribe your live speech
+                `;
+                this.transcribeRecordingBtn.disabled = false;
+                this.transcribeRecordingBtn.textContent = '🎵 Try Again';
             }
 
             handlePhotoSelect(event) {
